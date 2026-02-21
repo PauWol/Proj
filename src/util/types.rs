@@ -1,7 +1,8 @@
 use strum::IntoEnumIterator;
 use strum_macros::{EnumIter, Display};
 
-use crate::util::checks::is_installed_with_ui;
+use crate::install::lang::{i_python};
+use crate::util::exec::{is_tool_installed, run_checks_with_indicator,get_tool_version};
 
 #[derive(Debug, Clone, EnumIter, Display)]
 pub enum ProjectType {
@@ -63,15 +64,34 @@ pub struct Project {
 }
 
 impl Project {
-    pub fn new(name: String, project_type: ProjectType, template_type: TemplateType) -> Self {
-        Project {
-            name,
-            project_type,
-            template_type,
-        }
-    }
-
+    /// Checks if the required tools for the project type are installed
     pub fn checks(&self) -> bool {
-        is_installed_with_ui(&self.project_type)
+        
+        let results = run_checks_with_indicator(
+    "Checking Toolchain",
+    vec![
+        (
+            "Python",
+            Box::new(|| {
+    match get_tool_version("python", "--version") {
+        Some(version) => (true, Some(version)),
+        None => (false, None),
+    }
+}),
+        ),
+        (
+            "UV",
+            Box::new(|| {
+    match get_tool_version("uv", "--version") {
+        Some(version) => (true, Some(version)),
+        None => (false, None),
+    }
+}),
+        ),
+    ],
+);
+    println!("{:?}", results);
+    return true;
     }
 }
+
