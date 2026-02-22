@@ -17,6 +17,8 @@ pub fn execute(cmd: &str, args: &[&str]) -> io::Result<String> {
     if output.status.success() {
         Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
     } else {
+        eprintln!("Error executing {}: {}", cmd, String::from_utf8_lossy(&output.stderr).trim());
+
         Err(io::Error::new(
             io::ErrorKind::Other,
             String::from_utf8_lossy(&output.stderr).trim(),
@@ -179,4 +181,8 @@ pub fn get_tool_version(cmd: &str, arg: &str) -> Option<String> {
                 None
             }
         })
+}
+
+pub fn get_tool_version_tuple(cmd: (&str, &str)) -> Option<String> {
+    get_tool_version(cmd.0, cmd.1)
 }
